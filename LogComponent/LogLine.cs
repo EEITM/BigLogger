@@ -16,7 +16,7 @@ namespace LogTest
 
 		public LogLine()
 		{
-			this.Text = "";
+			Text = "";
 		}
 
 		#endregion
@@ -31,13 +31,13 @@ namespace LogTest
 		{
 			StringBuilder sb = new StringBuilder();
 
-			if (this.Text.Length > 0)
+			if (Text.Length > 0)
 			{
-				sb.Append(this.Text);
+				sb.Append(Text);
 				sb.Append(". ");
 			}
 
-			sb.Append(this.CreateLineText());
+			sb.Append(CreateLineText());
 
 			return sb.ToString();
 		}

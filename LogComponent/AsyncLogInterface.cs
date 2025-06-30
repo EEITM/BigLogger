@@ -1,6 +1,7 @@
 ﻿namespace LogTest
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.IO;
@@ -11,7 +12,7 @@
     public class AsyncLogInterface : LogInterface, IDisposable
     {
         private Thread _runThread;
-        private Collection<LogLine> _lines = new Collection<LogLine>();
+        private ConcurrentQueue<LogLine> _lines = new ConcurrentQueue<LogLine>();
 
         private StreamWriter _writer;
 
@@ -28,14 +29,14 @@
                 if (!Directory.Exists(basePath))
                     Directory.CreateDirectory(basePath);
 
-                this._writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff") + ".log");
+                _writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff") + ".log");
 
-                this._writer.Write("Timestamp".PadRight(25, ' ') + "\t" + "Data".PadRight(15, ' ') + "\t" + Environment.NewLine);
+                _writer.Write("Timestamp".PadRight(25, ' ') + "\t" + "Data".PadRight(15, ' ') + "\t" + Environment.NewLine);
 
-                this._writer.AutoFlush = true;
+                _writer.AutoFlush = true;
 
-                this._runThread = new Thread(this.MainLoop);
-                this._runThread.Start();
+                _runThread = new Thread(MainLoop);
+                _runThread.Start();
             }
             catch (Exception ex)
             {
@@ -46,87 +47,89 @@
 
         private void MainLoop()
         {
-            try
+            while (!_exit)
             {
-                while (!this._exit)
+                try
                 {
-                    if (this._lines.Count > 0)
+                    while (!_exit)
                     {
-                        int f = 0;
-                        List<LogLine> _handled = new List<LogLine>();
-
-                        foreach (LogLine logLine in this._lines.ToList())
+                        if (_lines.Count > 0)
                         {
-                            f++;
-                            if (f > 5)
-                                continue;
+                            int f = 0;
+                            ConcurrentQueue<LogLine> _handled = new ConcurrentQueue<LogLine>();
 
-                            try
+                            foreach (LogLine logLine in _lines.ToList())
                             {
-                                if (!this._exit || this._QuitWithFlush)
+                                f++;
+                                if (f > 5)
+                                    continue;
+
+                                try
                                 {
-                                    _handled.Add(logLine);
-                                    StringBuilder stringBuilder = new StringBuilder();
-
-                                    if ((DateTime.Now - _curDate).Days != 0)
+                                    if (!_exit || _QuitWithFlush)
                                     {
-                                        _curDate = DateTime.Now;
+                                        _handled.Enqueue(logLine);
+                                        StringBuilder stringBuilder = new StringBuilder();
 
-                                        this._writer?.Dispose(); // Don't forget to dispose the old writer
-                                        this._writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff") + ".log");
+                                        if ((DateTime.Now.Date != _curDate.Date))
+                                        {
+                                            _curDate = DateTime.Now;
 
-                                        this._writer.Write("Timestamp".PadRight(25, ' ') + "\t" + "Data".PadRight(15, ' ') + "\t" + Environment.NewLine);
-                                        this._writer.AutoFlush = true;
+                                            _writer?.Dispose(); // Don't forget to dispose the old writer
+                                            _writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff") + ".log");
+
+                                            _writer.Write("Timestamp".PadRight(25, ' ') + "\t" + "Data".PadRight(15, ' ') + "\t" + Environment.NewLine);
+                                            _writer.AutoFlush = true;
+                                        }
+
+                                        stringBuilder.Append(logLine.Timestamp.ToString("yyyy-MM-dd HH:mm:ss:fff"));
+                                        stringBuilder.Append("\t");
+                                        stringBuilder.Append(logLine.LineText());
+                                        stringBuilder.Append("\t");
+                                        stringBuilder.Append(Environment.NewLine);
+
+                                        _writer.Write(stringBuilder.ToString());
                                     }
-
-                                    stringBuilder.Append(logLine.Timestamp.ToString("yyyy-MM-dd HH:mm:ss:fff"));
-                                    stringBuilder.Append("\t");
-                                    stringBuilder.Append(logLine.LineText());
-                                    stringBuilder.Append("\t");
-                                    stringBuilder.Append(Environment.NewLine);
-
-                                    this._writer.Write(stringBuilder.ToString());
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.Error.WriteLine("Error writing log line: " + ex.Message);
                                 }
                             }
-                            catch (Exception ex)
-                            {
-                                Console.Error.WriteLine("Error writing log line: " + ex.Message);
-                            }
+
+                            foreach (var handledLine in _handled)
+                                _lines.TryDequeue(out LogLine dequeuedLine);
+
+                            if (_QuitWithFlush && _lines.Count == 0)
+                                _exit = true;
+
+                            Thread.Sleep(50);
                         }
-
-                        foreach (var handledLine in _handled)
-                            this._lines.Remove(handledLine);
-
-                        if (this._QuitWithFlush && this._lines.Count == 0)
-                            this._exit = true;
-
-                        Thread.Sleep(50);
                     }
                 }
+                catch (Exception ex)
+                {
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    Console.Error.WriteLine(ex.Message);
+                }
             }
-            catch (Exception ex)
-            {
-                Console.BackgroundColor = ConsoleColor.Red;
-                Console.Error.WriteLine(ex.Message);
-            }
-
         }
 
         public void StopWithoutFlush()
         {
-            this._exit = true;
+            _exit = true;
         }
 
         public void StopWithFlush()
         {
-            this._QuitWithFlush = true;
+            _QuitWithFlush = true;
         }
 
         public void WriteLog(string s)
         {
             try
             {
-                this._lines.Add(new LogLine() { Text = s, Timestamp = DateTime.Now });
+                _lines.Enqueue(new LogLine() { Text = s, Timestamp = DateTime.Now });
             }
             catch (Exception ex)
             {
@@ -137,7 +140,7 @@
 
         public void Dispose()
         {
-            this.Dispose();
+            _writer.Dispose();
         }
     }
 }
