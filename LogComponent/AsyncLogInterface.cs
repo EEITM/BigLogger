@@ -3,10 +3,11 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
-	using System.Text;
+    using System.Linq;
+    using System.Text;
 	using System.Threading;
 
-	public class AsyncLogInterface : LogInterface
+	public class AsyncLogInterface : LogInterface, IDisposable
 	{
 		private Thread _runThread;
 		private List<LogLine> _lines = new List<LogLine>();
@@ -14,13 +15,16 @@
 		private StreamWriter _writer;
 
 		private bool _exit;
+		private readonly string basePath = @"./LogTest";
+        private readonly string logPath = "/Log";
 
-		public AsyncLogInterface()
+
+        public AsyncLogInterface()
 		{
-			if (!Directory.Exists(@"./LogTest"))
-				Directory.CreateDirectory(@"./LogTest");
+			if (!Directory.Exists(basePath))
+				Directory.CreateDirectory(basePath);
 
-			this._writer = File.AppendText(@"./LogTest/Log" + DateTime.Now.ToString("yyyyMMdd HHmmss fff") + ".log");
+			this._writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff") + ".log");
 
 			this._writer.Write("Timestamp".PadRight(25, ' ') + "\t" + "Data".PadRight(15, ' ') + "\t" + Environment.NewLine);
 
@@ -44,7 +48,7 @@
 					int f = 0;
 					List<LogLine> _handled = new List<LogLine>();
 
-					foreach (LogLine logLine in this._lines)
+					foreach (LogLine logLine in this._lines.ToList())
 					{
 						f++;
 
@@ -61,7 +65,7 @@
 							{
 								_curDate = DateTime.Now;
 
-								this._writer = File.AppendText(@"./LogTest/Log" + DateTime.Now.ToString("yyyyMMdd HHmmss fff") + ".log");
+								this._writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff") + ".log");
 
 								this._writer.Write("Timestamp".PadRight(25, ' ') + "\t" + "Data".PadRight(15, ' ') + "\t" + Environment.NewLine);
 
@@ -96,12 +100,12 @@
 			}
 		}
 
-		public void Stop_Without_Flush()
+		public void StopWithoutFlush()
 		{
 			this._exit = true;
 		}
 
-		public void Stop_With_Flush()
+		public void StopWithFlush()
 		{
 			this._QuitWithFlush = true;
 		}
@@ -110,5 +114,10 @@
 		{
 			this._lines.Add(new LogLine() {Text = s, Timestamp = DateTime.Now});
 		}
-	}
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

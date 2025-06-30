@@ -16,7 +16,7 @@ namespace Application
 				Thread.Sleep(50);
 			}
 
-			logger.Stop_With_Flush();
+			logger.StopWithFlush();
 
 			LogInterface logger2 = new AsyncLogInterface();
 
@@ -26,7 +26,7 @@ namespace Application
 				Thread.Sleep(20);
 			}
 
-			logger2.Stop_Without_Flush();
+			logger2.StopWithoutFlush();
 
 			Console.ReadLine();
 		}
