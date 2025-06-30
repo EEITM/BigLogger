@@ -1,8 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{DE1ECC71-A33E-4B92-9A94-267B098D8141}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "Application\Application.csproj", "{DE1ECC71-A33E-4B92-9A94-267B098D8141}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogComponent", "LogComponent\LogComponent.csproj", "{26D29C79-2F06-4933-99D2-CFF7E696A82C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogComponent", "LogComponent\LogComponent.csproj", "{26D29C79-2F06-4933-99D2-CFF7E696A82C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LilTests", "LilTests\LilTests.csproj", "{B3C83CD0-D361-4192-897C-F7C15805AA7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +23,12 @@ Global
 		{26D29C79-2F06-4933-99D2-CFF7E696A82C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26D29C79-2F06-4933-99D2-CFF7E696A82C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26D29C79-2F06-4933-99D2-CFF7E696A82C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3C83CD0-D361-4192-897C-F7C15805AA7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3C83CD0-D361-4192-897C-F7C15805AA7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3C83CD0-D361-4192-897C-F7C15805AA7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3C83CD0-D361-4192-897C-F7C15805AA7A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

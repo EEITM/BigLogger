@@ -17,7 +17,8 @@
 		private bool _exit;
 		private readonly string basePath = @"./LogTest";
         private readonly string logPath = "/Log";
-
+		private bool _QuitWithFlush = false;
+		DateTime _curDate = DateTime.Now;
 
         public AsyncLogInterface()
 		{
@@ -34,10 +35,7 @@
 			this._runThread.Start();
 		}
 
-		private bool _QuitWithFlush = false;
 
-
-		DateTime _curDate = DateTime.Now;
 
 		private void MainLoop()
 		{
