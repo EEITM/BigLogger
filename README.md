@@ -10,7 +10,10 @@ I changed some structure, mostly moving things within checks, and correcting nam
 The question that intrigued me the most, was Question #4. My solution to this was just to add try-catch blocks, which was already needed before I focused on that question. Other than that, I avoided throwing errors. It was also a few moments since I last setup a Unit test, so I had to look up the standard structure.
 
 ## Tests
+When creating the test, besides remembering the standard structure, the main problem I had was finding the correct directory to read from. It took me a few tries, back and forth. I did not have time to test the midnight-functionality.
 
+## Things to consider for next interview
+I think the most important things to discuss with this project, is the flushing and the midnight test, as those were the things I found most challenging.
 
 ORIGINAL_TEXT_BELOW
 
