@@ -1,3 +1,19 @@
+# UPDATES
+The few following sections describe my thoughts while doing this exercise.
+
+## Thread safety and speed
+I spent some time with determining and reading about thread safety, to refresh my memory. Originally, I made the lists into collection, following guidelines. Eventually, I settled on making it a concurrentQueue. This involved making a few changes, with dequeue, and enqueue.
+
+## Overall impressions and corrections
+I changed some structure, mostly moving things within checks, and correcting names. There were also some properties for the class in the middle, that I moved to the top.
+
+The question that intrigued me the most, was Question #4. My solution to this was just to add try-catch blocks, which was already needed before I focused on that question. Other than that, I avoided throwing errors. It was also a few moments since I last setup a Unit test, so I had to look up the standard structure.
+
+## Tests
+
+
+ORIGINAL_TEXT_BELOW
+
 # Code Test
 The code test for new applicants.
 

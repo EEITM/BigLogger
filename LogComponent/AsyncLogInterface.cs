@@ -29,7 +29,7 @@
                 if (!Directory.Exists(basePath))
                     Directory.CreateDirectory(basePath);
 
-                _writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff"));
+                _writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff") + ".log");
                 _writer.Write("Timestamp".PadRight(25, ' ') + "\t" + "Data".PadRight(15, ' ') + "\t" + Environment.NewLine);
                 _writer.AutoFlush = true;
 
@@ -59,7 +59,7 @@
                             _curDate = DateTime.Now;
                             _writer.Dispose();
                             _writer.AutoFlush = true;
-                            _writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff"));
+                            _writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff") + ".log");
                             _writer.WriteLine("Timestamp".PadRight(25, ' ') + "\t" + "Data".PadRight(15, ' ') + "\t");
                         }
 
