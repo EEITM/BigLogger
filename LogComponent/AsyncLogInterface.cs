@@ -13,13 +13,13 @@
     {
         private Thread _runThread;
         private ConcurrentQueue<LogLine> _lines = new ConcurrentQueue<LogLine>();
+        private readonly CancellationTokenSource _cancellationTokenSource;
 
         private StreamWriter _writer;
 
-        private bool _exit;
         private readonly string basePath = @"./LogTest";
         private readonly string logPath = "/Log";
-        private bool _QuitWithFlush = false;
+        private bool _quitWithFlush = false;
         DateTime _curDate = DateTime.Now;
 
         public AsyncLogInterface()
@@ -29,12 +29,11 @@
                 if (!Directory.Exists(basePath))
                     Directory.CreateDirectory(basePath);
 
-                _writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff") + ".log");
-
+                _writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff"));
                 _writer.Write("Timestamp".PadRight(25, ' ') + "\t" + "Data".PadRight(15, ' ') + "\t" + Environment.NewLine);
-
                 _writer.AutoFlush = true;
 
+                _cancellationTokenSource = new CancellationTokenSource();
                 _runThread = new Thread(MainLoop);
                 _runThread.Start();
             }
@@ -47,82 +46,70 @@
 
         private void MainLoop()
         {
-            while (!_exit)
+            try
             {
-                try
+                while (!_cancellationTokenSource.Token.IsCancellationRequested)
                 {
-                    while (!_exit)
+                    if (_lines.TryDequeue(out LogLine logLine))
                     {
-                        if (_lines.Count > 0)
+                        var stringBuilder = new StringBuilder();
+
+                        if ((DateTime.Now.Date != _curDate.Date))
                         {
-                            int f = 0;
-                            ConcurrentQueue<LogLine> _handled = new ConcurrentQueue<LogLine>();
-
-                            foreach (LogLine logLine in _lines.ToList())
-                            {
-                                f++;
-                                if (f > 5)
-                                    continue;
-
-                                try
-                                {
-                                    if (!_exit || _QuitWithFlush)
-                                    {
-                                        _handled.Enqueue(logLine);
-                                        StringBuilder stringBuilder = new StringBuilder();
-
-                                        if ((DateTime.Now.Date != _curDate.Date))
-                                        {
-                                            _curDate = DateTime.Now;
-
-                                            _writer?.Dispose(); // Don't forget to dispose the old writer
-                                            _writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff") + ".log");
-
-                                            _writer.Write("Timestamp".PadRight(25, ' ') + "\t" + "Data".PadRight(15, ' ') + "\t" + Environment.NewLine);
-                                            _writer.AutoFlush = true;
-                                        }
-
-                                        stringBuilder.Append(logLine.Timestamp.ToString("yyyy-MM-dd HH:mm:ss:fff"));
-                                        stringBuilder.Append("\t");
-                                        stringBuilder.Append(logLine.LineText());
-                                        stringBuilder.Append("\t");
-                                        stringBuilder.Append(Environment.NewLine);
-
-                                        _writer.Write(stringBuilder.ToString());
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    Console.Error.WriteLine("Error writing log line: " + ex.Message);
-                                }
-                            }
-
-                            foreach (var handledLine in _handled)
-                                _lines.TryDequeue(out LogLine dequeuedLine);
-
-                            if (_QuitWithFlush && _lines.Count == 0)
-                                _exit = true;
-
-                            Thread.Sleep(50);
+                            _curDate = DateTime.Now;
+                            _writer.Dispose();
+                            _writer.AutoFlush = true;
+                            _writer = File.AppendText(basePath + logPath + DateTime.Now.ToString("yyyyMMdd HHmmss fff"));
+                            _writer.WriteLine("Timestamp".PadRight(25, ' ') + "\t" + "Data".PadRight(15, ' ') + "\t");
                         }
+
+                        stringBuilder.Append(logLine.Timestamp.ToString("yyyy-MM-dd HH:mm:ss:fff"));
+                        stringBuilder.Append("\t");
+                        stringBuilder.Append(logLine.LineText());
+                        stringBuilder.Append("\t");
+                        stringBuilder.Append(Environment.NewLine);
+
+                        _writer.Write(stringBuilder.ToString());
+                    }
+                    else
+                    {
+                        Thread.Sleep(50);
                     }
                 }
-                catch (Exception ex)
+
+                // Flush remaining logs if necessary (q. 3¨)
+                if (_quitWithFlush)
                 {
-                    Console.BackgroundColor = ConsoleColor.Red;
-                    Console.Error.WriteLine(ex.Message);
+                    while (_lines.TryDequeue(out LogLine logLine))
+                    {
+                        var stringBuilder = new StringBuilder();
+                        stringBuilder.Append(logLine.Timestamp.ToString("yyyy-MM-dd HH:mm:ss:fff"));
+                        stringBuilder.Append("\t");
+                        stringBuilder.Append(logLine.LineText());
+                        stringBuilder.Append("\t");
+                        stringBuilder.Append(Environment.NewLine);
+
+                        _writer.Write(stringBuilder.ToString());
+                    }
                 }
+
+                _writer.Dispose();
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine("Error in main loop: " + ex.ToString());            
             }
         }
 
         public void StopWithoutFlush()
         {
-            _exit = true;
+            _cancellationTokenSource.Cancel();
         }
 
         public void StopWithFlush()
         {
-            _QuitWithFlush = true;
+            _quitWithFlush = true;
+            _cancellationTokenSource.Cancel();
         }
 
         public void WriteLog(string s)
@@ -133,13 +120,14 @@
             }
             catch (Exception ex)
             {
-                Console.BackgroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine(ex.Message);
             }
         }
 
         public void Dispose()
         {
+            _cancellationTokenSource.Cancel();
+            _runThread.Join();
             _writer.Dispose();
         }
     }
