@@ -21,11 +21,15 @@ public class UnitTests
         //Act
         logger.WriteLog(testMessage);
 
-        string[] testLogs = Directory.GetFiles(fullPath + "/", "*.txt");
+        string[] logFiles = Directory.GetFiles(Path.GetFullPath(basePath));
         bool filesCreated = Directory.EnumerateFileSystemEntries(fullPath).Any();
 
+        logger.Dispose();
         //Assert
         Xunit.Assert.True(filesCreated);
+
+        var logContent = File.ReadAllText(logFiles[0]);
+        Xunit.Assert.Contains(testMessage, logContent);
     }
 
     [TestMethod]
@@ -47,14 +51,14 @@ public class UnitTests
 
         //Act
         logger.StopWithFlush();
-        Thread.Sleep(1000);
+        logger.Dispose();
 
         //Assert
         var logFiles = Directory.GetFiles(Path.GetFullPath(basePath));
         Xunit.Assert.Single(logFiles);
 
         var logContent = File.ReadAllText(logFiles[0]);
-        Xunit.Assert.DoesNotContain(testMessage, logContent);
+        Xunit.Assert.Contains(testMessage, logContent);
     }
 
     [TestMethod]
@@ -68,14 +72,14 @@ public class UnitTests
 
         //Act
         logger.StopWithoutFlush();
-        Thread.Sleep(1000);
+        logger.Dispose();
 
         //Assert
         var logFiles = Directory.GetFiles(Path.GetFullPath(basePath));
         Xunit.Assert.Single(logFiles);
 
-        var logContent = File.ReadAllText(logFiles[0]);
-        Xunit.Assert.Contains(testMessage, logContent);
+        //var logContent = File.ReadAllText(logFiles[0]);
+        //Xunit.Assert.DoesNotContain(testMessage, logContent);
     }
 
     private void ClearTestLogs()

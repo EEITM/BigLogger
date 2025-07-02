@@ -24,8 +24,6 @@
 
         public AsyncLogInterface()
         {
-            try
-            {
                 if (!Directory.Exists(basePath))
                     Directory.CreateDirectory(basePath);
 
@@ -36,12 +34,6 @@
                 _cancellationTokenSource = new CancellationTokenSource();
                 _runThread = new Thread(MainLoop);
                 _runThread.Start();
-            }
-            catch (Exception ex)
-            {
-                Console.BackgroundColor = ConsoleColor.Red;
-                Console.Error.WriteLine(ex.Message);
-            }
         }
 
         private void MainLoop()

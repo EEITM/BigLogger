@@ -2,14 +2,16 @@ namespace LogTest
 {
 	using System;
 	using System.Text;
+    using System.Threading;
 
-	/// <summary>
-	/// This is the object that the diff. loggers (filelogger, consolelogger etc.) will operate on. The LineText() method will be called to get the text (formatted) to log
-	/// </summary>
-	public class LogLine
+    /// <summary>
+    /// This is the object that the diff. loggers (filelogger, consolelogger etc.) will operate on. 
+    /// The LineText() method will be called to get the text (formatted) to log
+    /// </summary>
+    public class LogLine
 	{
 		#region Private Fields
-
+		
 		#endregion
 
 		#region Constructors
