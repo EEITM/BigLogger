@@ -1,0 +1,16 @@
+﻿Timestamp                	Data           	
+2025-06-30 22.17.51.497	Number with Flush: 0. 	
+2025-06-30 22.17.51.555	Number with Flush: 1. 	
+2025-06-30 22.17.51.616	Number with Flush: 2. 	
+2025-06-30 22.17.51.678	Number with Flush: 3. 	
+2025-06-30 22.17.51.740	Number with Flush: 4. 	
+2025-06-30 22.17.51.801	Number with Flush: 5. 	
+2025-06-30 22.17.51.863	Number with Flush: 6. 	
+2025-06-30 22.17.51.924	Number with Flush: 7. 	
+2025-06-30 22.17.51.985	Number with Flush: 8. 	
+2025-06-30 22.17.52.046	Number with Flush: 9. 	
+2025-06-30 22.17.52.107	Number with Flush: 10. 	
+2025-06-30 22.17.52.169	Number with Flush: 11. 	
+2025-06-30 22.17.52.232	Number with Flush: 12. 	
+2025-06-30 22.17.52.293	Number with Flush: 13. 	
+2025-06-30 22.17.52.355	Number with Flush: 14. 	
